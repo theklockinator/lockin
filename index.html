@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      ;(function () {
+        var k = 'lockin-theme'
+        var t = localStorage.getItem(k) || 'dark'
+        if (t === 'amethyst') t = 'emerald'
+        var light = t === 'light' || t === 'sunrise'
+        document.documentElement.dataset.theme = t
+        document.documentElement.style.colorScheme = light ? 'light' : 'dark'
+      })()
+    </script>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>lockin</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

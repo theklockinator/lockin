@@ -1,0 +1,325 @@
+@import 'tailwindcss';
+
+/* Semantic tokens — overridden per theme via data-theme on <html> */
+:root,
+[data-theme='dark'] {
+  color-scheme: dark;
+  --lockin-background: #09090b;
+  --lockin-foreground: #fafafa;
+  --lockin-muted: #27272a;
+  --lockin-muted-foreground: #a1a1aa;
+  --lockin-border: #3f3f46;
+  --lockin-input: #18181b;
+  --lockin-ring: #52525b;
+  --lockin-primary: #fafafa;
+  --lockin-primary-foreground: #18181b;
+  --lockin-secondary: #27272a;
+  --lockin-secondary-foreground: #fafafa;
+  --lockin-destructive: #7f1d1d;
+  --lockin-destructive-foreground: #fafafa;
+  --lockin-accent: #27272a;
+  --lockin-accent-foreground: #fafafa;
+  --lockin-success: #166534;
+  --lockin-success-foreground: #bbf7d0;
+  --lockin-surface: #18181b;
+  --lockin-surface-elevated: #09090b;
+  --lockin-urgency-today: #fcd34d;
+  --lockin-urgency-soon: #fdba74;
+  --lockin-link: #38bdf8;
+  --lockin-panel-tint-bg: rgb(12 74 110 / 0.22);
+  --lockin-panel-tint-text: #bae6fd;
+  --lockin-panel-tint-border: rgb(14 165 233 / 0.35);
+  --lockin-selection: #38bdf8;
+  --lockin-selection-muted: rgb(12 74 110 / 0.35);
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+  --lockin-background: #fafafa;
+  --lockin-foreground: #18181b;
+  --lockin-muted: #e4e4e7;
+  --lockin-muted-foreground: #71717a;
+  --lockin-border: #d4d4d8;
+  --lockin-input: #ffffff;
+  --lockin-ring: #a1a1aa;
+  --lockin-primary: #18181b;
+  --lockin-primary-foreground: #fafafa;
+  --lockin-secondary: #f4f4f5;
+  --lockin-secondary-foreground: #18181b;
+  --lockin-destructive: #b91c1c;
+  --lockin-destructive-foreground: #fafafa;
+  --lockin-accent: #f4f4f5;
+  --lockin-accent-foreground: #18181b;
+  --lockin-success: #15803d;
+  --lockin-success-foreground: #14532d;
+  --lockin-surface: #ffffff;
+  --lockin-surface-elevated: #f4f4f5;
+  --lockin-urgency-today: #b45309;
+  --lockin-urgency-soon: #c2410c;
+  --lockin-link: #0369a1;
+  --lockin-panel-tint-bg: rgb(14 165 233 / 0.1);
+  --lockin-panel-tint-text: #0c4a6e;
+  --lockin-panel-tint-border: rgb(14 165 233 / 0.35);
+  --lockin-selection: #0284c7;
+  --lockin-selection-muted: rgb(14 165 233 / 0.12);
+}
+
+[data-theme='crimson'] {
+  color-scheme: dark;
+  --lockin-background: #1a0508;
+  --lockin-foreground: #fce7e7;
+  --lockin-muted: #3f1218;
+  --lockin-muted-foreground: #c4a0a4;
+  --lockin-border: #6b1d28;
+  --lockin-input: #260a10;
+  --lockin-ring: #9f1239;
+  --lockin-primary: #fecaca;
+  --lockin-primary-foreground: #450a0a;
+  --lockin-secondary: #3f1218;
+  --lockin-secondary-foreground: #fce7e7;
+  --lockin-destructive: #991b1b;
+  --lockin-destructive-foreground: #fef2f2;
+  --lockin-accent: #4c0519;
+  --lockin-accent-foreground: #fecdd3;
+  --lockin-success: #14532d;
+  --lockin-success-foreground: #bbf7d0;
+  --lockin-surface: #260a10;
+  --lockin-surface-elevated: #1a0508;
+  --lockin-urgency-today: #fcd34d;
+  --lockin-urgency-soon: #fdba74;
+  --lockin-link: #fda4af;
+  --lockin-panel-tint-bg: rgb(127 29 29 / 0.25);
+  --lockin-panel-tint-text: #fecaca;
+  --lockin-panel-tint-border: rgb(225 29 72 / 0.35);
+  --lockin-selection: #fb7185;
+  --lockin-selection-muted: rgb(127 29 29 / 0.4);
+}
+
+[data-theme='sunrise'] {
+  color-scheme: light;
+  --lockin-background: #fffbeb;
+  --lockin-foreground: #422006;
+  --lockin-muted: #fde68a;
+  --lockin-muted-foreground: #92400e;
+  --lockin-border: #fcd34d;
+  --lockin-input: #ffffff;
+  --lockin-ring: #d97706;
+  --lockin-primary: #b45309;
+  --lockin-primary-foreground: #fffbeb;
+  --lockin-secondary: #fef3c7;
+  --lockin-secondary-foreground: #78350f;
+  --lockin-destructive: #b91c1c;
+  --lockin-destructive-foreground: #fff7ed;
+  --lockin-accent: #fde68a;
+  --lockin-accent-foreground: #78350f;
+  --lockin-success: #15803d;
+  --lockin-success-foreground: #14532d;
+  --lockin-surface: #ffffff;
+  --lockin-surface-elevated: #fef3c7;
+  --lockin-urgency-today: #b45309;
+  --lockin-urgency-soon: #c2410c;
+  --lockin-link: #0369a1;
+  --lockin-panel-tint-bg: rgb(217 119 6 / 0.12);
+  --lockin-panel-tint-text: #78350f;
+  --lockin-panel-tint-border: rgb(217 119 6 / 0.4);
+  --lockin-selection: #b45309;
+  --lockin-selection-muted: rgb(217 119 6 / 0.15);
+}
+
+[data-theme='mist'] {
+  color-scheme: dark;
+  --lockin-background: #030712;
+  --lockin-foreground: #e0f2fe;
+  --lockin-muted: #0f172a;
+  --lockin-muted-foreground: #64748b;
+  --lockin-border: #1e293b;
+  --lockin-input: #020617;
+  --lockin-ring: #0ea5e9;
+  --lockin-primary: #bae6fd;
+  --lockin-primary-foreground: #082f49;
+  --lockin-secondary: #0f172a;
+  --lockin-secondary-foreground: #e0f2fe;
+  --lockin-destructive: #7f1d1d;
+  --lockin-destructive-foreground: #fef2f2;
+  --lockin-accent: #0c1929;
+  --lockin-accent-foreground: #7dd3fc;
+  --lockin-success: #14532d;
+  --lockin-success-foreground: #bbf7d0;
+  --lockin-surface: #020617;
+  --lockin-surface-elevated: #030712;
+  --lockin-urgency-today: #fcd34d;
+  --lockin-urgency-soon: #fdba74;
+  --lockin-link: #38bdf8;
+  --lockin-panel-tint-bg: rgb(8 47 73 / 0.45);
+  --lockin-panel-tint-text: #bae6fd;
+  --lockin-panel-tint-border: rgb(14 165 233 / 0.35);
+  --lockin-selection: #38bdf8;
+  --lockin-selection-muted: rgb(8 47 73 / 0.5);
+}
+
+[data-theme='emerald'] {
+  color-scheme: dark;
+  --lockin-background: #000000;
+  --lockin-foreground: #ecfccb;
+  --lockin-muted: #14532d;
+  --lockin-muted-foreground: #86efac;
+  --lockin-border: #4ade80;
+  --lockin-input: #0a0a0a;
+  --lockin-ring: #22c55e;
+  --lockin-primary: #bbf7d0;
+  --lockin-primary-foreground: #052e16;
+  --lockin-secondary: #052e16;
+  --lockin-secondary-foreground: #bbf7d0;
+  --lockin-destructive: #7f1d1d;
+  --lockin-destructive-foreground: #fef2f2;
+  --lockin-accent: #14532d;
+  --lockin-accent-foreground: #86efac;
+  --lockin-success: #166534;
+  --lockin-success-foreground: #bbf7d0;
+  --lockin-surface: #0a0a0a;
+  --lockin-surface-elevated: #000000;
+  --lockin-urgency-today: #fcd34d;
+  --lockin-urgency-soon: #fdba74;
+  --lockin-link: #4ade80;
+  --lockin-panel-tint-bg: rgb(20 83 45 / 0.35);
+  --lockin-panel-tint-text: #bbf7d0;
+  --lockin-panel-tint-border: rgb(74 222 128 / 0.35);
+  --lockin-selection: #4ade80;
+  --lockin-selection-muted: rgb(20 83 45 / 0.45);
+}
+
+@theme {
+  --color-background: var(--lockin-background);
+  --color-foreground: var(--lockin-foreground);
+  --color-muted: var(--lockin-muted);
+  --color-muted-foreground: var(--lockin-muted-foreground);
+  --color-border: var(--lockin-border);
+  --color-input: var(--lockin-input);
+  --color-ring: var(--lockin-ring);
+  --color-primary: var(--lockin-primary);
+  --color-primary-foreground: var(--lockin-primary-foreground);
+  --color-secondary: var(--lockin-secondary);
+  --color-secondary-foreground: var(--lockin-secondary-foreground);
+  --color-destructive: var(--lockin-destructive);
+  --color-destructive-foreground: var(--lockin-destructive-foreground);
+  --color-accent: var(--lockin-accent);
+  --color-accent-foreground: var(--lockin-accent-foreground);
+  --color-success: var(--lockin-success);
+  --color-success-foreground: var(--lockin-success-foreground);
+  --color-surface: var(--lockin-surface);
+  --color-surface-elevated: var(--lockin-surface-elevated);
+  --color-urgency-today: var(--lockin-urgency-today);
+  --color-urgency-soon: var(--lockin-urgency-soon);
+  --color-link: var(--lockin-link);
+  --color-panel-tint: var(--lockin-panel-tint-bg);
+  --color-panel-tint-text: var(--lockin-panel-tint-text);
+  --color-panel-tint-border: var(--lockin-panel-tint-border);
+  --color-selection: var(--lockin-selection);
+  --color-selection-muted: var(--lockin-selection-muted);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family:
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      sans-serif;
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--lockin-foreground);
+    opacity: 0.38;
+  }
+
+}
+
+/* Native date/time picker icons (outside @layer for reliable WebKit overrides) */
+html[data-theme='dark'],
+html[data-theme='crimson'],
+html[data-theme='mist'],
+html[data-theme='emerald'] {
+  --lockin-picker-calendar: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e4e4e7'%3E%3Cpath d='M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V10h14v10z'/%3E%3C/svg%3E");
+  --lockin-picker-clock: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e4e4e7'%3E%3Cpath d='M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm.75-12.25v5.5l4.5 2.67-.75 1.23-5-2.96V7.75h1.25z'/%3E%3C/svg%3E");
+}
+
+html[data-theme='light'],
+html[data-theme='sunrise'] {
+  --lockin-picker-calendar: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2352525b'%3E%3Cpath d='M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V10h14v10z'/%3E%3C/svg%3E");
+  --lockin-picker-clock: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2352525b'%3E%3Cpath d='M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm.75-12.25v5.5l4.5 2.67-.75 1.23-5-2.96V7.75h1.25z'/%3E%3C/svg%3E");
+}
+
+html[data-theme='dark'] input[type='date'],
+html[data-theme='dark'] input[type='datetime-local'],
+html[data-theme='dark'] input[type='time'],
+html[data-theme='crimson'] input[type='date'],
+html[data-theme='crimson'] input[type='datetime-local'],
+html[data-theme='crimson'] input[type='time'],
+html[data-theme='mist'] input[type='date'],
+html[data-theme='mist'] input[type='datetime-local'],
+html[data-theme='mist'] input[type='time'],
+html[data-theme='emerald'] input[type='date'],
+html[data-theme='emerald'] input[type='datetime-local'],
+html[data-theme='emerald'] input[type='time'] {
+  color-scheme: dark;
+}
+
+html[data-theme='light'] input[type='date'],
+html[data-theme='light'] input[type='datetime-local'],
+html[data-theme='light'] input[type='time'],
+html[data-theme='sunrise'] input[type='date'],
+html[data-theme='sunrise'] input[type='datetime-local'],
+html[data-theme='sunrise'] input[type='time'] {
+  color-scheme: light;
+}
+
+html[data-theme='dark'] input[type='date']::-webkit-calendar-picker-indicator,
+html[data-theme='dark'] input[type='datetime-local']::-webkit-calendar-picker-indicator,
+html[data-theme='crimson'] input[type='date']::-webkit-calendar-picker-indicator,
+html[data-theme='crimson'] input[type='datetime-local']::-webkit-calendar-picker-indicator,
+html[data-theme='mist'] input[type='date']::-webkit-calendar-picker-indicator,
+html[data-theme='mist'] input[type='datetime-local']::-webkit-calendar-picker-indicator,
+html[data-theme='emerald'] input[type='date']::-webkit-calendar-picker-indicator,
+html[data-theme='emerald'] input[type='datetime-local']::-webkit-calendar-picker-indicator,
+html[data-theme='light'] input[type='date']::-webkit-calendar-picker-indicator,
+html[data-theme='light'] input[type='datetime-local']::-webkit-calendar-picker-indicator,
+html[data-theme='sunrise'] input[type='date']::-webkit-calendar-picker-indicator,
+html[data-theme='sunrise'] input[type='datetime-local']::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 1;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-inline-start: 0.125rem;
+  filter: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--lockin-picker-calendar) center / contain no-repeat;
+}
+
+html[data-theme='dark'] input[type='time']::-webkit-calendar-picker-indicator,
+html[data-theme='crimson'] input[type='time']::-webkit-calendar-picker-indicator,
+html[data-theme='mist'] input[type='time']::-webkit-calendar-picker-indicator,
+html[data-theme='emerald'] input[type='time']::-webkit-calendar-picker-indicator,
+html[data-theme='light'] input[type='time']::-webkit-calendar-picker-indicator,
+html[data-theme='sunrise'] input[type='time']::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 1;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-inline-start: 0.125rem;
+  filter: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--lockin-picker-clock) center / contain no-repeat;
+}
