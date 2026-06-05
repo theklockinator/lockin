@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { normalizePaper } from './paper-datetime'
 import type { Exam } from './exam-types'
 import { MAX_EXAMS } from './exam-types'
 import { normalizeNotesState } from './notes-storage'
@@ -9,7 +10,9 @@ import { DEFAULT_ROLLING_N, MAX_ROLLING_N, MIN_ROLLING_N } from './types'
 
 const practicePaperSchema = z.object({
   id: z.string(),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  name: z.string().optional(),
+  completedAt: z.string().optional(),
+  date: z.string().optional(),
   timeMinutes: z.number().min(0),
   marks: z.number().min(0),
 })
@@ -144,6 +147,7 @@ function normalizeImportedUnit(unit: z.infer<typeof unitSchema>): Unit {
       MAX_ROLLING_N,
       Math.max(MIN_ROLLING_N, Math.floor(n)),
     ),
+    practicePapers: unit.practicePapers.map((paper) => normalizePaper(paper)),
   }
 }
 

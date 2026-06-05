@@ -1,9 +1,16 @@
-import { useState, type KeyboardEvent } from 'react'
+import { useState, type KeyboardEvent, type ReactNode } from 'react'
 import { Trash2 } from 'lucide-react'
 import { HoldConfirmButton } from '@/components/ui/hold-confirm-button'
 import { Button } from '@/components/ui/button'
 import { Dialog } from '@/components/ui/dialog'
+import { DecimalField } from '@/components/ui/decimal-input'
 import { Input } from '@/components/ui/input'
+import {
+  currentDatetimeLocal,
+  formatPaperDateTime,
+  toDatetimeLocalValue,
+} from '@/lib/paper-datetime'
+import { parseDecimalInput, formatDecimalInput } from '@/lib/decimal-input'
 import {
   papersOnDate,
   rollingAvgMarks,
@@ -14,6 +21,7 @@ import {
   timeDelta,
   todayStr,
 } from '@/lib/stats'
+import { numberInputNoSpin } from '@/lib/form-classes'
 import { MAX_ROLLING_N, MIN_ROLLING_N } from '@/lib/types'
 import type { Unit } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -24,13 +32,19 @@ type UnitProps = {
 }
 
 type Draft = {
-  date: string
+  name: string
+  completedAt: string
   timeMinutes: string
   marks: string
 }
 
 function emptyDraft(): Draft {
-  return { date: todayStr(), timeMinutes: '', marks: '' }
+  return {
+    name: '',
+    completedAt: currentDatetimeLocal(),
+    timeMinutes: '',
+    marks: '',
+  }
 }
 
 export function PracticeGrid({ unit }: UnitProps) {
@@ -52,17 +66,17 @@ export function PracticeGrid({ unit }: UnitProps) {
   const targetN = unit.rollingN
 
   const submitDraft = () => {
-    const timeMinutes = Number(draft.timeMinutes)
-    const marksVal = Number(draft.marks)
+    const timeMinutes = parseDecimalInput(draft.timeMinutes)
+    const marksVal = parseDecimalInput(draft.marks)
 
     if (
-      !draft.date ||
-      !Number.isFinite(timeMinutes) ||
+      !draft.completedAt ||
+      timeMinutes === null ||
       timeMinutes < 0 ||
-      !Number.isFinite(marksVal) ||
+      marksVal === null ||
       marksVal < 0
     ) {
-      setError('Enter valid date, time, and marks.')
+      setError('Enter valid date & time, duration, and marks.')
       return
     }
     if (marksVal > unit.maxMarks) {
@@ -71,7 +85,8 @@ export function PracticeGrid({ unit }: UnitProps) {
     }
 
     const ok = addPaper(unit.id, {
-      date: draft.date,
+      name: draft.name.trim(),
+      completedAt: draft.completedAt,
       timeMinutes,
       marks: marksVal,
     })
@@ -157,6 +172,68 @@ export function PracticeGrid({ unit }: UnitProps) {
         </span>
       </label>
 
+      <section
+        className="rounded-md border border-panel-tint-border bg-panel-tint px-3 py-3"
+        aria-label="Add practice paper"
+      >
+        <h4 className="mb-2 text-xs font-medium text-panel-tint-text">
+          Add practice paper
+        </h4>
+        <div className="grid gap-2 sm:grid-cols-[minmax(7rem,1fr)_minmax(11rem,1.2fr)_6rem_6rem_auto] sm:items-end">
+          <label className="space-y-1 text-xs text-muted-foreground">
+            Paper name
+            <Input
+              value={draft.name}
+              onChange={(e) =>
+                setDraft((d) => ({ ...d, name: e.target.value }))
+              }
+              onKeyDown={handleDraftKeyDown}
+              className="h-8"
+            />
+          </label>
+          <label className="space-y-1 text-xs text-muted-foreground">
+            Date & time
+            <Input
+              type="datetime-local"
+              value={draft.completedAt}
+              onChange={(e) =>
+                setDraft((d) => ({ ...d, completedAt: e.target.value }))
+              }
+              onKeyDown={handleDraftKeyDown}
+              className="h-8"
+            />
+          </label>
+          <label className="space-y-1 text-xs text-muted-foreground">
+            Time (min)
+            <InputWithMax max={unit.examDurationMinutes}>
+              <DecimalField
+                value={draft.timeMinutes}
+                onChange={(timeMinutes) =>
+                  setDraft((d) => ({ ...d, timeMinutes }))
+                }
+                onKeyDown={handleDraftKeyDown}
+                className="h-8"
+              />
+            </InputWithMax>
+          </label>
+          <label className="space-y-1 text-xs text-muted-foreground">
+            Marks
+            <InputWithMax max={unit.maxMarks}>
+              <DecimalField
+                value={draft.marks}
+                onChange={(marks) => setDraft((d) => ({ ...d, marks }))}
+                onKeyDown={handleDraftKeyDown}
+                className="h-8"
+              />
+            </InputWithMax>
+          </label>
+          <Button type="button" size="sm" onClick={submitDraft} className="h-8">
+            Add paper
+          </Button>
+        </div>
+        {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
+      </section>
+
       <div>
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <h4 className="text-xs font-medium text-muted-foreground">
@@ -175,10 +252,11 @@ export function PracticeGrid({ unit }: UnitProps) {
           )}
         </div>
         <div className="overflow-x-auto rounded-md border border-border">
-          <table className="w-full min-w-[480px] text-sm">
+          <table className="w-full min-w-[560px] text-sm">
             <thead>
               <tr className="border-b border-border bg-surface-elevated/80 text-left text-xs text-muted-foreground">
-                <th className="px-3 py-2 font-medium">Date</th>
+                <th className="px-3 py-2 font-medium">Paper name</th>
+                <th className="px-3 py-2 font-medium">Date & time</th>
                 <th className="px-3 py-2 font-medium">Time (min)</th>
                 <th className="px-3 py-2 font-medium">Marks</th>
                 <th className="px-3 py-2 font-medium">Score %</th>
@@ -189,10 +267,10 @@ export function PracticeGrid({ unit }: UnitProps) {
               {papers.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={6}
                     className="px-3 py-6 text-center text-xs text-muted-foreground"
                   >
-                    No papers yet — add one below.
+                    No papers yet — add one above.
                   </td>
                 </tr>
               ) : (
@@ -210,60 +288,6 @@ export function PracticeGrid({ unit }: UnitProps) {
           </table>
         </div>
       </div>
-
-      <section
-        className="rounded-md border border-panel-tint-border bg-panel-tint px-3 py-3"
-        aria-label="Add practice paper"
-      >
-        <h4 className="mb-2 text-xs font-medium text-panel-tint-text">
-          Add practice paper
-        </h4>
-        <div className="grid gap-2 sm:grid-cols-[1fr_6rem_6rem_auto] sm:items-end">
-          <label className="space-y-1 text-xs text-muted-foreground">
-            Date
-            <Input
-              type="date"
-              value={draft.date}
-              onChange={(e) =>
-                setDraft((d) => ({ ...d, date: e.target.value }))
-              }
-              onKeyDown={handleDraftKeyDown}
-              className="h-8"
-            />
-          </label>
-          <label className="space-y-1 text-xs text-muted-foreground">
-            Time (min)
-            <Input
-              type="number"
-              min={0}
-              value={draft.timeMinutes}
-              onChange={(e) =>
-                setDraft((d) => ({ ...d, timeMinutes: e.target.value }))
-              }
-              onKeyDown={handleDraftKeyDown}
-              className="h-8 tabular-nums"
-            />
-          </label>
-          <label className="space-y-1 text-xs text-muted-foreground">
-            Marks
-            <Input
-              type="number"
-              min={0}
-              max={unit.maxMarks}
-              value={draft.marks}
-              onChange={(e) =>
-                setDraft((d) => ({ ...d, marks: e.target.value }))
-              }
-              onKeyDown={handleDraftKeyDown}
-              className="h-8 tabular-nums"
-            />
-          </label>
-          <Button type="button" size="sm" onClick={submitDraft} className="h-8">
-            Add paper
-          </Button>
-        </div>
-        {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
-      </section>
 
       <Dialog
         open={confirmDeleteAll}
@@ -310,7 +334,12 @@ function PaperRow({
   onUpdate: (
     unitId: string,
     paperId: string,
-    patch: Partial<{ date: string; timeMinutes: number; marks: number }>,
+    patch: Partial<{
+      name: string
+      completedAt: string
+      timeMinutes: number
+      marks: number
+    }>,
   ) => boolean
   onDelete: (unitId: string, paperId: string) => void
 }) {
@@ -318,44 +347,63 @@ function PaperRow({
     <tr className="border-b border-border/60 hover:bg-surface-elevated/30">
       <td className="px-2 py-1.5">
         <Input
-          type="date"
-          defaultValue={paper.date}
+          defaultValue={paper.name}
           onBlur={(e) => {
-            if (e.target.value !== paper.date) {
-              onUpdate(unit.id, paper.id, { date: e.target.value })
+            const v = e.target.value.trim()
+            if (v !== paper.name) {
+              onUpdate(unit.id, paper.id, { name: v })
             }
           }}
-          className="h-8"
+          className="h-8 min-w-[7rem]"
         />
       </td>
       <td className="px-2 py-1.5">
         <Input
-          type="number"
-          min={0}
-          defaultValue={paper.timeMinutes}
+          type="datetime-local"
+          defaultValue={toDatetimeLocalValue(paper.completedAt)}
+          title={formatPaperDateTime(paper.completedAt)}
           onBlur={(e) => {
-            const val = Number(e.target.value)
-            if (Number.isFinite(val) && val !== paper.timeMinutes) {
-              onUpdate(unit.id, paper.id, { timeMinutes: val })
+            if (
+              e.target.value &&
+              e.target.value !== toDatetimeLocalValue(paper.completedAt)
+            ) {
+              onUpdate(unit.id, paper.id, { completedAt: e.target.value })
             }
           }}
-          className="h-8 tabular-nums"
+          className="h-8 min-w-[11rem]"
         />
       </td>
       <td className="px-2 py-1.5">
-        <Input
-          type="number"
-          min={0}
-          max={unit.maxMarks}
-          defaultValue={paper.marks}
-          onBlur={(e) => {
-            const val = Number(e.target.value)
-            if (Number.isFinite(val) && val !== paper.marks) {
-              onUpdate(unit.id, paper.id, { marks: val })
-            }
-          }}
-          className="h-8 tabular-nums"
-        />
+        <InputWithMax max={unit.examDurationMinutes}>
+          <Input
+            type="text"
+            inputMode="decimal"
+            defaultValue={formatDecimalInput(paper.timeMinutes)}
+            onBlur={(e) => {
+              const val = parseDecimalInput(e.target.value)
+              if (val !== null && val !== paper.timeMinutes) {
+                onUpdate(unit.id, paper.id, { timeMinutes: val })
+              }
+            }}
+            className={cn('h-8', numberInputNoSpin, 'tabular-nums')}
+          />
+        </InputWithMax>
+      </td>
+      <td className="px-2 py-1.5">
+        <InputWithMax max={unit.maxMarks}>
+          <Input
+            type="text"
+            inputMode="decimal"
+            defaultValue={formatDecimalInput(paper.marks)}
+            onBlur={(e) => {
+              const val = parseDecimalInput(e.target.value)
+              if (val !== null && val !== paper.marks) {
+                onUpdate(unit.id, paper.id, { marks: val })
+              }
+            }}
+            className={cn('h-8', numberInputNoSpin, 'tabular-nums')}
+          />
+        </InputWithMax>
       </td>
       <td className="px-3 py-2 tabular-nums text-muted-foreground">
         {scorePercent(paper.marks, unit.maxMarks)}%
@@ -371,5 +419,22 @@ function PaperRow({
         </HoldConfirmButton>
       </td>
     </tr>
+  )
+}
+
+function InputWithMax({
+  max,
+  children,
+}: {
+  max: number
+  children: ReactNode
+}) {
+  return (
+    <div className="flex items-center gap-1">
+      <div className="min-w-0 flex-1">{children}</div>
+      <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+        /{max}
+      </span>
+    </div>
   )
 }

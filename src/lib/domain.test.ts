@@ -28,12 +28,13 @@ function makeUnit(overrides: Partial<Unit> = {}): Unit {
 
 function paper(
   id: string,
-  date: string,
-  overrides: Partial<{ timeMinutes: number; marks: number }> = {},
+  completedAt: string,
+  overrides: Partial<{ name: string; timeMinutes: number; marks: number }> = {},
 ) {
   return {
     id,
-    date,
+    name: '',
+    completedAt,
     timeMinutes: 80,
     marks: 80,
     ...overrides,
@@ -45,10 +46,10 @@ describe('stats', () => {
     const unit = makeUnit({
       rollingN: 3,
       practicePapers: [
-        { id: '1', date: '2026-06-01', timeMinutes: 80, marks: 70 },
-        { id: '2', date: '2026-06-02', timeMinutes: 90, marks: 80 },
-        { id: '3', date: '2026-06-03', timeMinutes: 100, marks: 90 },
-        { id: '4', date: '2026-06-04', timeMinutes: 60, marks: 60 },
+        { id: '1', name: '', completedAt: '2026-06-01', timeMinutes: 80, marks: 70 },
+        { id: '2', name: '', completedAt: '2026-06-02', timeMinutes: 90, marks: 80 },
+        { id: '3', name: '', completedAt: '2026-06-03', timeMinutes: 100, marks: 90 },
+        { id: '4', name: '', completedAt: '2026-06-04', timeMinutes: 60, marks: 60 },
       ],
     })
     expect(rollingAvgMarks(unit)).toBe(76.7)
@@ -59,10 +60,10 @@ describe('stats', () => {
     const unit = makeUnit({
       rollingN: 2,
       practicePapers: [
-        { id: '1', date: '2026-06-01', timeMinutes: 80, marks: 70 },
-        { id: '2', date: '2026-06-02', timeMinutes: 90, marks: 80 },
-        { id: '3', date: '2026-06-03', timeMinutes: 100, marks: 90 },
-        { id: '4', date: '2026-06-04', timeMinutes: 60, marks: 60 },
+        { id: '1', name: '', completedAt: '2026-06-01', timeMinutes: 80, marks: 70 },
+        { id: '2', name: '', completedAt: '2026-06-02', timeMinutes: 90, marks: 80 },
+        { id: '3', name: '', completedAt: '2026-06-03', timeMinutes: 100, marks: 90 },
+        { id: '4', name: '', completedAt: '2026-06-04', timeMinutes: 60, marks: 60 },
       ],
     })
     expect(rollingAvgMarks(unit)).toBe(75)
@@ -72,7 +73,7 @@ describe('stats', () => {
   it('averages fewer than n papers when not enough history', () => {
     const unit = makeUnit({
       practicePapers: [
-        { id: '1', date: '2026-06-01', timeMinutes: 80, marks: 80 },
+        { id: '1', name: '', completedAt: '2026-06-01', timeMinutes: 80, marks: 80 },
       ],
     })
     expect(rollingAvgMarks(unit)).toBe(80)
@@ -83,8 +84,8 @@ describe('stats', () => {
     const unit = makeUnit({
       dailyQuota: 2,
       practicePapers: [
-        { id: '1', date: '2026-06-02', timeMinutes: 80, marks: 80 },
-        { id: '2', date: '2026-06-02', timeMinutes: 90, marks: 85 },
+        { id: '1', name: '', completedAt: '2026-06-02', timeMinutes: 80, marks: 80 },
+        { id: '2', name: '', completedAt: '2026-06-02', timeMinutes: 90, marks: 85 },
       ],
     })
     expect(papersOnDate(unit, '2026-06-02')).toBe(2)

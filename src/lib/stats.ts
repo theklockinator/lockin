@@ -1,4 +1,5 @@
 import { format } from 'date-fns'
+import { paperDate } from './paper-datetime'
 import type { PracticePaper, Unit } from './types'
 import { DEFAULT_ROLLING_N, MAX_ROLLING_N, MIN_ROLLING_N } from './types'
 
@@ -7,7 +8,7 @@ export function todayStr(): string {
 }
 
 export function papersOnDate(unit: Unit, date: string): number {
-  return unit.practicePapers.filter((p) => p.date === date).length
+  return unit.practicePapers.filter((p) => paperDate(p) === date).length
 }
 
 export function quotaMet(unit: Unit, date: string): boolean {
@@ -26,8 +27,8 @@ export function scorePercent(marks: number, maxMarks: number): number {
 
 export function sortedPapers(unit: Unit): PracticePaper[] {
   return [...unit.practicePapers].sort((a, b) => {
-    const dateCmp = b.date.localeCompare(a.date)
-    if (dateCmp !== 0) return dateCmp
+    const atCmp = b.completedAt.localeCompare(a.completedAt)
+    if (atCmp !== 0) return atCmp
     return b.id.localeCompare(a.id)
   })
 }

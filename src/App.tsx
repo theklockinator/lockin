@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ExamTab } from '@/components/ExamTab'
+import { StatsTab } from '@/components/StatsTab'
 import { Header } from '@/components/Header'
 import { NotesTab } from '@/components/NotesTab'
 import { TabNav, type AppTab } from '@/components/TabNav'
@@ -26,6 +27,7 @@ export default function App() {
           )}
           {tab === 'notes' && <NotesTab />}
           {tab === 'exam' && <ExamTab />}
+          {tab === 'stats' && <StatsTab />}
         </div>
       </main>
       <TimerWidget />

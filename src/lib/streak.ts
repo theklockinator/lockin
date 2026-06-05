@@ -1,4 +1,5 @@
 import { addDays, format, isAfter, parseISO, subDays } from 'date-fns'
+import { paperDate } from './paper-datetime'
 import { allQuotasMet } from './stats'
 import type { StreakState, Unit } from './types'
 
@@ -6,7 +7,8 @@ function earliestPaperDate(units: Unit[]): string | null {
   let earliest: string | null = null
   for (const unit of units) {
     for (const paper of unit.practicePapers) {
-      if (!earliest || paper.date < earliest) earliest = paper.date
+      const d = paperDate(paper)
+      if (!earliest || d < earliest) earliest = d
     }
   }
   return earliest

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { HoldConfirmButton } from '@/components/ui/hold-confirm-button'
 import { Input } from '@/components/ui/input'
 import { EXAM_STATUSES, type Exam, type ExamStatus } from '@/lib/exam-types'
+import { formatDecimalInput, parseDecimalInput } from '@/lib/decimal-input'
 import {
   daysLeftUrgency,
   formatDaysLeft,
@@ -27,7 +28,7 @@ const urgencyClass: Record<
   normal: 'text-foreground',
 }
 
-const numberCellClass = cn('h-8 w-full', numberInputNoSpin)
+const numberCellClass = cn('h-8 w-full tabular-nums', numberInputNoSpin)
 
 const fieldLabelClass =
   'mb-1 block text-[10px] font-medium leading-tight text-muted-foreground'
@@ -141,12 +142,12 @@ function ExamRow({ exam }: { exam: Exam }) {
         </FieldCell>
         <FieldCell label="Duration" className="w-[4.5rem]">
           <Input
-            type="number"
-            min={1}
-            defaultValue={exam.durationMinutes}
+            type="text"
+            inputMode="decimal"
+            defaultValue={formatDecimalInput(exam.durationMinutes)}
             onBlur={(e) => {
-              const v = Number(e.target.value)
-              if (Number.isFinite(v) && v > 0 && v !== exam.durationMinutes) {
+              const v = parseDecimalInput(e.target.value)
+              if (v !== null && v > 0 && v !== exam.durationMinutes) {
                 patch({ durationMinutes: v })
               }
             }}
@@ -155,11 +156,12 @@ function ExamRow({ exam }: { exam: Exam }) {
         </FieldCell>
         <FieldCell label="Marks achieved" className="w-[4.75rem]">
           <Input
-            type="number"
-            min={0}
-            max={exam.maxMarks}
+            type="text"
+            inputMode="decimal"
             defaultValue={
-              exam.marksAchieved === null ? '' : exam.marksAchieved
+              exam.marksAchieved === null
+                ? ''
+                : formatDecimalInput(exam.marksAchieved)
             }
             disabled={exam.status !== 'completed'}
             readOnly={exam.status !== 'completed'}
@@ -170,9 +172,9 @@ function ExamRow({ exam }: { exam: Exam }) {
                 if (exam.marksAchieved !== null) patch({ marksAchieved: null })
                 return
               }
-              const v = Number(raw)
+              const v = parseDecimalInput(raw)
               if (
-                Number.isFinite(v) &&
+                v !== null &&
                 v >= 0 &&
                 v <= exam.maxMarks &&
                 v !== exam.marksAchieved
@@ -188,12 +190,12 @@ function ExamRow({ exam }: { exam: Exam }) {
         </FieldCell>
         <FieldCell label="Max marks" className="w-[4.5rem]">
           <Input
-            type="number"
-            min={1}
-            defaultValue={exam.maxMarks}
+            type="text"
+            inputMode="decimal"
+            defaultValue={formatDecimalInput(exam.maxMarks)}
             onBlur={(e) => {
-              const v = Number(e.target.value)
-              if (Number.isFinite(v) && v > 0 && v !== exam.maxMarks) {
+              const v = parseDecimalInput(e.target.value)
+              if (v !== null && v > 0 && v !== exam.maxMarks) {
                 patch({ maxMarks: v })
               }
             }}

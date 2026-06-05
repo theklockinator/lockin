@@ -8,10 +8,12 @@ import {
   ArrowDown,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { DecimalField } from '@/components/ui/decimal-input'
 import { Field } from '@/components/ui/field'
 import { Dialog } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { PracticeGrid } from '@/components/PracticeGrid'
+import { parseDecimalInput } from '@/lib/decimal-input'
 import {
   papersOnDate,
   quotaMet,
@@ -52,13 +54,16 @@ export function UnitCard({ unit, isFirst, isLast }: UnitCardProps) {
   const delta = timeDelta(time, unit.examDurationMinutes)
 
   const saveEdit = () => {
-    const examDurationMinutes = Number(duration)
-    const max = Number(maxMarks)
-    const dailyQuota = Number(quota)
+    const examDurationMinutes = parseDecimalInput(duration)
+    const max = parseDecimalInput(maxMarks)
+    const dailyQuota = parseDecimalInput(quota)
     if (
       !name.trim() ||
+      examDurationMinutes === null ||
       examDurationMinutes <= 0 ||
+      max === null ||
       max <= 0 ||
+      dailyQuota === null ||
       dailyQuota <= 0
     ) {
       return
@@ -176,30 +181,24 @@ export function UnitCard({ unit, isFirst, isLast }: UnitCardProps) {
               />
             </Field>
             <Field label="Duration (min)" htmlFor={`edit-duration-${unit.id}`}>
-              <Input
+              <DecimalField
                 id={`edit-duration-${unit.id}`}
-                type="number"
-                min={1}
                 value={duration}
-                onChange={(e) => setDuration(e.target.value)}
+                onChange={setDuration}
               />
             </Field>
             <Field label="Max marks" htmlFor={`edit-marks-${unit.id}`}>
-              <Input
+              <DecimalField
                 id={`edit-marks-${unit.id}`}
-                type="number"
-                min={1}
                 value={maxMarks}
-                onChange={(e) => setMaxMarks(e.target.value)}
+                onChange={setMaxMarks}
               />
             </Field>
             <Field label="Daily quota" htmlFor={`edit-quota-${unit.id}`}>
-              <Input
+              <DecimalField
                 id={`edit-quota-${unit.id}`}
-                type="number"
-                min={1}
                 value={quota}
-                onChange={(e) => setQuota(e.target.value)}
+                onChange={setQuota}
               />
             </Field>
           </div>

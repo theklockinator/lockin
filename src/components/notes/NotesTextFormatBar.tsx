@@ -1,5 +1,6 @@
 import { Bold, Italic, Underline } from 'lucide-react'
 import type { NotesEditorSettings } from '@/lib/notes-types'
+import { parseDecimalInput } from '@/lib/decimal-input'
 import { cn } from '@/lib/utils'
 import { ColorField, numberInputClass } from './notes-panel-fields'
 
@@ -45,15 +46,16 @@ export function NotesTextFormatBar({
       <label className="inline-flex items-center gap-1 text-xs text-muted-foreground">
         <span>Size</span>
         <input
-          type="number"
+          type="text"
+          inputMode="numeric"
           min={10}
           max={48}
           defaultValue={14}
           disabled={!active}
           className={`h-7 w-12 rounded-md border border-border bg-surface px-2 ${numberInputClass}`}
           onChange={(e) => {
-            const v = Number(e.target.value)
-            if (Number.isFinite(v)) onFontSize(v)
+            const v = parseDecimalInput(e.target.value)
+            if (v !== null) onFontSize(v)
           }}
         />
       </label>

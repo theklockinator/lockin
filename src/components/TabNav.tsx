@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 
-export type AppTab = 'track' | 'notes' | 'exam'
+export type AppTab = 'track' | 'notes' | 'exam' | 'stats'
 
 export function TabNav({
   active,
@@ -13,6 +13,7 @@ export function TabNav({
     { id: 'track', label: 'Track' },
     { id: 'notes', label: 'Notes' },
     { id: 'exam', label: 'Exam' },
+    { id: 'stats', label: 'Stats' },
   ]
 
   return (

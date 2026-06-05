@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
+import { DecimalField } from '@/components/ui/decimal-input'
 import { Field } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
+import { parseDecimalInput } from '@/lib/decimal-input'
 import { DEFAULT_ROLLING_N, MAX_UNITS } from '@/lib/types'
 import { useLockinStore } from '@/store/useLockinStore'
 
@@ -29,20 +31,20 @@ export function UnitForm() {
     if (atLimit) return
 
     const trimmed = name.trim()
-    const examDurationMinutes = Number(duration)
-    const max = Number(maxMarks)
-    const dailyQuota = Number(quota)
+    const examDurationMinutes = parseDecimalInput(duration)
+    const max = parseDecimalInput(maxMarks)
+    const dailyQuota = parseDecimalInput(quota)
 
     if (!trimmed) {
       setError('Name is required.')
       return
     }
     if (
-      !Number.isFinite(examDurationMinutes) ||
+      examDurationMinutes === null ||
       examDurationMinutes <= 0 ||
-      !Number.isFinite(max) ||
+      max === null ||
       max <= 0 ||
-      !Number.isFinite(dailyQuota) ||
+      dailyQuota === null ||
       dailyQuota <= 0
     ) {
       setError('Duration, max marks, and quota must be positive numbers.')
@@ -81,30 +83,24 @@ export function UnitForm() {
             />
           </Field>
           <Field label="Exam duration (min)" htmlFor="unit-duration">
-            <Input
+            <DecimalField
               id="unit-duration"
-              type="number"
-              min={1}
               value={duration}
-              onChange={(e) => setDuration(e.target.value)}
+              onChange={setDuration}
             />
           </Field>
           <Field label="Max marks" htmlFor="unit-max-marks">
-            <Input
+            <DecimalField
               id="unit-max-marks"
-              type="number"
-              min={1}
               value={maxMarks}
-              onChange={(e) => setMaxMarks(e.target.value)}
+              onChange={setMaxMarks}
             />
           </Field>
           <Field label="Daily quota" htmlFor="unit-quota">
-            <Input
+            <DecimalField
               id="unit-quota"
-              type="number"
-              min={1}
               value={quota}
-              onChange={(e) => setQuota(e.target.value)}
+              onChange={setQuota}
             />
           </Field>
           <div className="flex items-end sm:col-span-2 lg:col-span-1">

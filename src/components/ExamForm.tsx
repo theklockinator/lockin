@@ -1,10 +1,11 @@
 import { format } from 'date-fns'
 import { useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
+import { DecimalField } from '@/components/ui/decimal-input'
 import { Field } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { MAX_EXAMS } from '@/lib/exam-types'
-import { numberInputNoSpin } from '@/lib/form-classes'
+import { parseDecimalInput } from '@/lib/decimal-input'
 import { parseLinksText } from '@/lib/exam-utils'
 import { useExamStore } from '@/store/useExamStore'
 
@@ -52,8 +53,8 @@ export function ExamForm() {
     if (atLimit) return
 
     const trimmed = name.trim()
-    const durationMinutes = Number(duration)
-    const max = Number(maxMarks)
+    const durationMinutes = parseDecimalInput(duration)
+    const max = parseDecimalInput(maxMarks)
 
     if (!trimmed) {
       setError('Exam name is required.')
@@ -64,9 +65,9 @@ export function ExamForm() {
       return
     }
     if (
-      !Number.isFinite(durationMinutes) ||
+      durationMinutes === null ||
       durationMinutes <= 0 ||
-      !Number.isFinite(max) ||
+      max === null ||
       max <= 0
     ) {
       setError('Duration and max marks must be positive numbers.')
@@ -126,23 +127,17 @@ export function ExamForm() {
               />
             </Field>
             <Field label="Duration (min)" htmlFor="exam-duration">
-              <Input
+              <DecimalField
                 id="exam-duration"
-                type="number"
-                min={1}
                 value={duration}
-                onChange={(e) => setDuration(e.target.value)}
-                className={numberInputNoSpin}
+                onChange={setDuration}
               />
             </Field>
             <Field label="Max marks" htmlFor="exam-max-marks">
-              <Input
+              <DecimalField
                 id="exam-max-marks"
-                type="number"
-                min={1}
                 value={maxMarks}
-                onChange={(e) => setMaxMarks(e.target.value)}
-                className={numberInputNoSpin}
+                onChange={setMaxMarks}
               />
             </Field>
             <Field label="Location" htmlFor="exam-location">

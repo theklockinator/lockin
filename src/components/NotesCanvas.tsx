@@ -82,6 +82,14 @@ function isMod(e: { metaKey: boolean; ctrlKey: boolean }) {
   return e.metaKey || e.ctrlKey
 }
 
+type PickModifier = 'none' | 'shift'
+
+function pickModifierFromEvent(e: { shiftKey: boolean }): PickModifier {
+  return e.shiftKey ? 'shift' : 'none'
+}
+
+const PAN_CLICK_SLOP_PX = 5
+
 function clampZoom(z: number) {
   return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(z * 100) / 100))
 }
@@ -148,6 +156,14 @@ export const NotesCanvas = forwardRef<
   const panRef = useRef<{ x: number; y: number; sl: number; st: number } | null>(
     null,
   )
+  const panPendingRef = useRef<{
+    clientX: number
+    clientY: number
+    canvX: number
+    canvY: number
+    modifier: PickModifier
+    panning: boolean
+  } | null>(null)
   const editDragRef = useRef<{
     startX: number
     startY: number
@@ -340,7 +356,7 @@ export const NotesCanvas = forwardRef<
   )
 
   const pickBoxAt = useCallback(
-    (px: number, py: number, additive: boolean) => {
+    (px: number, py: number, modifier: PickModifier) => {
       const hits = boxesAtPoint(px, py, textBoxes)
       if (hits.length === 0) return false
 
@@ -355,7 +371,7 @@ export const NotesCanvas = forwardRef<
       boxClickCycleRef.current = { x: px, y: py, ids, index }
       const pick = hits[index]
 
-      if (additive) {
+      if (modifier === 'shift') {
         const next = new Set(selectedBoxIds)
         if (next.has(pick.id)) next.delete(pick.id)
         else next.add(pick.id)
@@ -369,11 +385,11 @@ export const NotesCanvas = forwardRef<
   )
 
   const pickImageAt = useCallback(
-    (px: number, py: number, additive: boolean) => {
+    (px: number, py: number, modifier: PickModifier) => {
       const hits = imagesAtPoint(px, py, images)
       if (hits.length === 0) return false
-      const pick = hits[0]
-      if (additive) {
+      const pick = hits[0]!
+      if (modifier === 'shift') {
         const next = new Set(selectedImageIds)
         if (next.has(pick.id)) next.delete(pick.id)
         else next.add(pick.id)
@@ -387,21 +403,16 @@ export const NotesCanvas = forwardRef<
   )
 
   const pickAt = useCallback(
-    (
-      px: number,
-      py: number,
-      additive: boolean,
-      deselectOnMiss = !additive,
-    ) => {
-      if (pickBoxAt(px, py, additive)) return
-      if (pickImageAt(px, py, additive)) return
+    (px: number, py: number, modifier: PickModifier): boolean => {
+      if (pickBoxAt(px, py, modifier)) return true
+      if (pickImageAt(px, py, modifier)) return true
 
       const sortedStrokes = sortByZIndex(strokes)
       const stroke = [...sortedStrokes]
         .reverse()
         .find((s) => hitTestStroke(px, py, s))
       if (stroke) {
-        if (additive) {
+        if (modifier === 'shift') {
           const next = new Set(selectedStrokeIds)
           if (next.has(stroke.id)) next.delete(stroke.id)
           else next.add(stroke.id)
@@ -409,18 +420,12 @@ export const NotesCanvas = forwardRef<
         } else {
           setSelection([], [stroke.id], [])
         }
-        return
+        return true
       }
-      if (!additive || deselectOnMiss) clearSelection()
+      if (modifier === 'none') clearSelection()
+      return false
     },
-    [
-      pickBoxAt,
-      pickImageAt,
-      strokes,
-      clearSelection,
-      setSelection,
-      selectedStrokeIds,
-    ],
+    [pickBoxAt, pickImageAt, strokes, clearSelection, setSelection],
   )
 
   const deleteSelected = useCallback(() => {
@@ -740,7 +745,7 @@ export const NotesCanvas = forwardRef<
       return
     }
 
-    if (tool === 'text' && hasTextTargets) {
+    if (tool === 'edit' && hasTextTargets) {
       formatShortcut(
         e.nativeEvent,
         () => toggleFormatKey('bold'),
@@ -872,30 +877,43 @@ export const NotesCanvas = forwardRef<
     const canv = pointerToCanvas(e.clientX, e.clientY)
     surfaceRef.current?.focus({ preventScroll: true })
 
-    if (e.ctrlKey) {
-      pickAt(canv.x, canv.y, true, true)
+    if (tool === 'color') {
+      pickAt(canv.x, canv.y, pickModifierFromEvent(e))
       return
     }
 
     if (tool === 'pan') {
-      const container = containerRef.current
-      if (!container) return
-      panRef.current = {
-        x: e.clientX,
-        y: e.clientY,
-        sl: container.scrollLeft,
-        st: container.scrollTop,
+      panPendingRef.current = {
+        clientX: e.clientX,
+        clientY: e.clientY,
+        canvX: canv.x,
+        canvY: canv.y,
+        modifier: pickModifierFromEvent(e),
+        panning: false,
       }
       e.currentTarget.setPointerCapture(e.pointerId)
       return
     }
 
     if (tool === 'insert') {
-      placeTextBox(canv)
+      const modifier = pickModifierFromEvent(e)
+      if (modifier === 'shift') {
+        pickAt(canv.x, canv.y, modifier)
+        return
+      }
+      if (!pickAt(canv.x, canv.y, modifier)) {
+        placeTextBox(canv)
+      }
       return
     }
 
     if (tool === 'edit') {
+      const pickMod = pickModifierFromEvent(e)
+      if (pickMod === 'shift') {
+        pickAt(canv.x, canv.y, pickMod)
+        return
+      }
+
       const hitSelectedStroke = [...sortByZIndex(strokes)]
         .reverse()
         .find(
@@ -947,6 +965,25 @@ export const NotesCanvas = forwardRef<
 
   const handleSurfacePointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
     const canv = pointerToCanvas(e.clientX, e.clientY)
+
+    if (panPendingRef.current && !panPendingRef.current.panning) {
+      const pending = panPendingRef.current
+      if (
+        Math.hypot(e.clientX - pending.clientX, e.clientY - pending.clientY) >=
+        PAN_CLICK_SLOP_PX
+      ) {
+        const container = containerRef.current
+        if (container) {
+          pending.panning = true
+          panRef.current = {
+            x: pending.clientX,
+            y: pending.clientY,
+            sl: container.scrollLeft,
+            st: container.scrollTop,
+          }
+        }
+      }
+    }
 
     if (panRef.current && containerRef.current) {
       containerRef.current.scrollLeft =
@@ -1159,6 +1196,15 @@ export const NotesCanvas = forwardRef<
   }
 
   const handleSurfacePointerUp = () => {
+    if (panPendingRef.current) {
+      const pending = panPendingRef.current
+      panPendingRef.current = null
+      if (!pending.panning) {
+        pickAt(pending.canvX, pending.canvY, pending.modifier)
+      }
+      panRef.current = null
+      return
+    }
     if (panRef.current) {
       panRef.current = null
       return
@@ -1221,7 +1267,7 @@ export const NotesCanvas = forwardRef<
           }
         }
       } else {
-        pickAt(drag.startX, drag.startY, drag.shiftKey, false)
+        pickAt(drag.startX, drag.startY, drag.shiftKey ? 'shift' : 'none')
       }
       return
     }
@@ -1253,8 +1299,9 @@ export const NotesCanvas = forwardRef<
   const sortedBoxes = sortByZIndex(textBoxes)
   const sortedImages = sortByZIndex(images)
 
-  const canEditContent = tool === 'edit' || tool === 'text'
+  const canEditContent = tool === 'edit'
   const canManipulate = tool === 'edit'
+  const objectPointerEvents = tool !== 'draw'
 
   const resizeHandle = (
     onDown: (e: ReactPointerEvent<HTMLDivElement>) => void,
@@ -1275,7 +1322,6 @@ export const NotesCanvas = forwardRef<
           tool === 'pan' && 'cursor-grab active:cursor-grabbing',
           tool === 'edit' && 'cursor-default',
           tool === 'insert' && 'cursor-crosshair',
-          tool === 'text' && 'cursor-text',
           tool === 'draw' &&
             (drawSubTool === 'eraser' ? 'cursor-cell' : 'cursor-crosshair'),
           tool === 'color' && 'cursor-default',
@@ -1342,22 +1388,19 @@ export const NotesCanvas = forwardRef<
                   top: img.y,
                   width: img.width,
                   height: img.height,
-                  pointerEvents:
-                    tool === 'pan' || tool === 'draw' || tool === 'color'
-                      ? 'none'
-                      : 'auto',
+                  pointerEvents: objectPointerEvents ? 'auto' : 'none',
                   ...(highlighted
                     ? { boxShadow: `0 0 0 2px ${settings.highlightColor}` }
                     : {}),
                 }}
                 onPointerDown={(e) => {
-                  if (!canManipulate) return
+                  if (!objectPointerEvents || canManipulate) return
                   if ((e.target as HTMLElement).closest('[data-resize-handle]'))
                     return
                   if ((e.target as HTMLElement).closest('[data-top-bar]')) return
                   e.stopPropagation()
                   const canv = pointerToCanvas(e.clientX, e.clientY)
-                  pickImageAt(canv.x, canv.y, e.shiftKey)
+                  pickImageAt(canv.x, canv.y, pickModifierFromEvent(e))
                 }}
               >
                 <img
@@ -1374,7 +1417,9 @@ export const NotesCanvas = forwardRef<
                       onPointerDown={(e) => {
                         e.stopPropagation()
                         const canv = pointerToCanvas(e.clientX, e.clientY)
-                        pickImageAt(canv.x, canv.y, e.shiftKey)
+                        const modifier = pickModifierFromEvent(e)
+                        pickImageAt(canv.x, canv.y, modifier)
+                        if (modifier !== 'none') return
                         imageDragRef.current = {
                           id: img.id,
                           offsetX: canv.x - img.x,
@@ -1426,10 +1471,7 @@ export const NotesCanvas = forwardRef<
                   width: box.width,
                   height: box.height,
                   backgroundColor: bg,
-                  pointerEvents:
-                    tool === 'pan' || tool === 'draw' || tool === 'color'
-                      ? 'none'
-                      : 'auto',
+                  pointerEvents: objectPointerEvents ? 'auto' : 'none',
                   ...(highlighted
                     ? { boxShadow: `0 0 0 2px ${settings.highlightColor}` }
                     : {}),
@@ -1442,10 +1484,12 @@ export const NotesCanvas = forwardRef<
                     selected ? 'bg-selection-muted' : 'bg-surface-elevated/60',
                   )}
                   onPointerDown={(e) => {
-                    if (!canManipulate) return
+                    if (!objectPointerEvents) return
                     e.stopPropagation()
                     const canv = pointerToCanvas(e.clientX, e.clientY)
-                    pickBoxAt(canv.x, canv.y, e.shiftKey)
+                    const modifier = pickModifierFromEvent(e)
+                    pickBoxAt(canv.x, canv.y, modifier)
+                    if (!canManipulate || modifier !== 'none') return
                     boxDragRef.current = {
                       id: box.id,
                       offsetX: canv.x - box.x,

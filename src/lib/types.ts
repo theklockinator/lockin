@@ -1,6 +1,8 @@
 export type PracticePaper = {
   id: string
-  date: string
+  name: string
+  /** Local datetime, e.g. 2026-06-15T14:30 */
+  completedAt: string
   timeMinutes: number
   marks: number
 }

@@ -6,7 +6,6 @@ import {
   Palette,
   Pencil,
   Plus,
-  Type,
   Upload,
 } from 'lucide-react'
 import { useRef, useState } from 'react'
@@ -34,19 +33,19 @@ const TOOLS: { id: NotesTool; label: string; icon: typeof Hand }[] = [
   { id: 'pan', label: 'Pan', icon: Hand },
   { id: 'edit', label: 'Edit', icon: MousePointer2 },
   { id: 'insert', label: 'Insert', icon: Plus },
-  { id: 'text', label: 'Text', icon: Type },
   { id: 'draw', label: 'Draw', icon: Pencil },
   { id: 'color', label: 'Color', icon: Palette },
 ]
 
 const HINTS: Record<NotesTool, string> = {
-  pan: 'Drag to pan. ⌘ scroll or ⌘+/− to zoom.',
+  pan: 'Drag to pan. Click selects; ⇧-click toggles in selection. ⌘ scroll or ⌘+/− to zoom.',
   edit:
-    'Select/move/resize. ⌘A select all. ⌘C/X/V · Del · ⇧H · ⌘↑↓ layer · ⌘Z',
-  insert: 'Click canvas for a text box. Paste images with ⌘V.',
-  text: 'Format text boxes. Box fill and text color. ⌘B · ⌘I · ⌘U',
+    'Select/move/resize text & colors below. Click replaces selection; ⇧-click toggles. ⌘A · ⌘C/X/V · Del · ⇧H · ⌘↑↓ · ⌘Z',
+  insert:
+    'Click empty canvas for a text box. Click selects; ⇧-click toggles. Paste images with ⌘V.',
   draw: 'Pen or eraser. Draw color and size on pen; eraser diameter on eraser. ⌘Z undo.',
-  color: 'Draw and highlight colors, highlight width. Apply to selection.',
+  color:
+    'Highlight and draw colors. Click selects; ⇧-click toggles. Apply color to selected.',
 }
 
 export function NotesTab() {
@@ -192,7 +191,7 @@ export function NotesTab() {
         <NotesInsertPanel onInsertImage={() => imageRef.current?.click()} />
       )}
 
-      {tool === 'text' && (
+      {tool === 'edit' && (
         <NotesTextFormatBar
           active={hasTextTargets}
           settings={settings}

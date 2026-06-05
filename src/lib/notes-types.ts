@@ -62,7 +62,6 @@ export type NotesTool =
   | 'pan'
   | 'edit'
   | 'insert'
-  | 'text'
   | 'draw'
   | 'color'
 export type DrawSubTool = 'pen' | 'eraser'

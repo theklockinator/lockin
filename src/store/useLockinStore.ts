@@ -9,6 +9,7 @@ import {
   MAX_UNITS,
   MIN_ROLLING_N,
 } from '@/lib/types'
+import { normalizePaper, type LegacyPaper } from '@/lib/paper-datetime'
 import { generateId } from '@/lib/utils'
 
 type UnitInput = {
@@ -26,6 +27,9 @@ function normalizeUnit(unit: Unit): Unit {
     rollingN: Math.min(
       MAX_ROLLING_N,
       Math.max(MIN_ROLLING_N, Math.floor(n)),
+    ),
+    practicePapers: unit.practicePapers.map((paper) =>
+      normalizePaper(paper as LegacyPaper),
     ),
   }
 }
@@ -168,7 +172,11 @@ export const useLockinStore = create<LockinStore>()(
         if (paper.marks > unit.maxMarks) return false
         if (paper.timeMinutes < 0) return false
 
-        const nextPaper: PracticePaper = { ...paper, id: generateId() }
+        const nextPaper: PracticePaper = normalizePaper({
+          ...paper,
+          name: paper.name.trim(),
+          id: generateId(),
+        })
         const nextUnits = units.map((u) =>
           u.id === unitId
             ? { ...u, practicePapers: [...u.practicePapers, nextPaper] }
@@ -186,7 +194,11 @@ export const useLockinStore = create<LockinStore>()(
         const existing = unit.practicePapers.find((p) => p.id === paperId)
         if (!existing) return false
 
-        const next = { ...existing, ...patch }
+        const next = normalizePaper({
+          ...existing,
+          ...patch,
+          name: patch.name !== undefined ? patch.name.trim() : existing.name,
+        })
         if (next.marks > unit.maxMarks) return false
         if (next.timeMinutes < 0) return false
 
