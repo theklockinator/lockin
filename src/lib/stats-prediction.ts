@@ -1,6 +1,6 @@
 import {
   percentToGrade,
-  type GradeBoundary,
+  type GradeBoundarySettings,
 } from './grade-boundaries'
 import {
   practiceHoursAtMs,
@@ -108,11 +108,11 @@ export { timeUsedPercent }
 
 export function expectedGradeFromRegression(
   regression: MarksRegression | null,
-  boundaries: GradeBoundary[],
+  settings: GradeBoundarySettings,
 ): { grade: string; percent: number } | null {
   if (!regression) return null
   const percent = Math.round(regression.predictPercentNow * 10) / 10
-  return { grade: percentToGrade(percent, boundaries).grade, percent }
+  return { grade: percentToGrade(percent, settings).grade, percent }
 }
 
 export function practicePercentPerHour(

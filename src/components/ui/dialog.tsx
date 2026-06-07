@@ -27,13 +27,18 @@ export function Dialog({
         aria-modal="true"
         aria-labelledby="dialog-title"
         className={cn(
-          'relative z-10 w-full max-w-md rounded-lg border border-border bg-surface p-6 shadow-lg',
+          'relative z-10 flex max-h-[min(90vh,100%)] w-full max-w-md flex-col overflow-hidden rounded-lg border border-border bg-surface shadow-lg',
         )}
       >
-        <h2 id="dialog-title" className="mb-4 text-lg font-medium">
+        <h2
+          id="dialog-title"
+          className="shrink-0 border-b border-border px-6 py-4 text-lg font-medium"
+        >
           {title}
         </h2>
-        {children}
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
+          {children}
+        </div>
       </div>
     </div>
   )

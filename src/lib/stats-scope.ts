@@ -5,7 +5,7 @@ import {
   startOfDay,
   subDays,
 } from 'date-fns'
-import { percentToGrade, type GradeBoundary } from './grade-boundaries'
+import { percentToGrade, type GradeBoundarySettings } from './grade-boundaries'
 import { buildMarksRegression } from './stats-prediction'
 import { paperAtMs, parsePaperAt } from './paper-datetime'
 import { timeUsedPercent } from './random-forest'
@@ -272,7 +272,7 @@ export function matchExamForUnit(
 export function unitBreakdown(
   units: Unit[],
   scope: StatsScope,
-  boundaries: GradeBoundary[],
+  gradeSettings: GradeBoundarySettings,
   exams: { subject: string; name: string; targetGrade: string }[],
   now = new Date(),
 ): UnitBreakdownRow[] {
@@ -291,7 +291,9 @@ export function unitBreakdown(
         reg?.predictPercentNow ??
         (summary.avgMarksPercent !== null ? summary.avgMarksPercent : null)
       const estimatedGrade =
-        predicted === null ? '—' : percentToGrade(predicted, boundaries).grade
+        predicted === null
+          ? '—'
+          : percentToGrade(predicted, gradeSettings).grade
       const exam = matchExamForUnit(unit, exams)
       const targetGrade = exam?.targetGrade ?? '—'
       const avg =

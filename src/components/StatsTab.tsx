@@ -23,7 +23,7 @@ import {
   practicePercentPerHour,
 } from '@/lib/stats-prediction'
 import { useExamStore } from '@/store/useExamStore'
-import { useGradeStore } from '@/store/useGradeStore'
+import { useGradeSettings } from '@/store/useGradeStore'
 import { useLockinStore } from '@/store/useLockinStore'
 import {
   STATS_SCOPES,
@@ -40,7 +40,7 @@ export function StatsTab() {
   const units = useLockinStore((s) => s.units)
   const streak = useLockinStore((s) => s.streak)
   const exams = useExamStore((s) => s.exams)
-  const boundaries = useGradeStore((s) => s.boundaries)
+  const gradeSettings = useGradeSettings()
 
   const [scope, setScope] = useState<StatsScope>('month')
   const [unitId, setUnitId] = useState<string | 'all'>('all')
@@ -65,21 +65,21 @@ export function StatsTab() {
   const breakdown = useMemo(
     () =>
       unitId === 'all'
-        ? unitBreakdown(units, scope, boundaries, exams)
+        ? unitBreakdown(units, scope, gradeSettings, exams)
         : [],
-    [units, scope, unitId, boundaries, exams],
+    [units, scope, unitId, gradeSettings, exams],
   )
 
   const gradeInfo = useMemo(() => {
-    const fromRf = expectedGradeFromRegression(regression, boundaries)
+    const fromRf = expectedGradeFromRegression(regression, gradeSettings)
     if (fromRf) return fromRf
     const pct = fallbackPredictPercent(rows)
     if (pct === null) return null
     return {
-      grade: percentToGrade(pct, boundaries).grade,
+      grade: percentToGrade(pct, gradeSettings).grade,
       percent: pct,
     }
-  }, [regression, boundaries, rows])
+  }, [regression, gradeSettings, rows])
 
   const examTarget = useMemo(() => {
     if (unitId === 'all' || sortedUnits.length === 0) return null
@@ -95,10 +95,10 @@ export function StatsTab() {
 
   const hoursToTarget = useMemo(() => {
     if (!examTarget) return null
-    const min = resolveGradeMinPercent(examTarget.targetGrade, boundaries)
+    const min = resolveGradeMinPercent(examTarget.targetGrade, gradeSettings)
     if (min === null) return null
     return hoursToTargetFromRows(rows, min)
-  }, [examTarget, boundaries, rows])
+  }, [examTarget, gradeSettings, rows])
 
   if (units.length === 0) {
     return (
